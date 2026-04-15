@@ -15,7 +15,7 @@ def commonSettings: Seq[Setting[?]] = Seq(
   (pluginCrossBuild / sbtVersion) := {
     scalaBinaryVersion.value match {
       case "2.12" => "1.9.0"
-      case _      => "2.0.0-RC11"
+      case _      => "2.0.0-RC12"
     }
   },
   scalacOptions ++= {
@@ -28,15 +28,6 @@ def commonSettings: Seq[Setting[?]] = Seq(
   scriptedLaunchOpts := {
     scriptedLaunchOpts.value ++
     Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
-  },
-  scriptedLaunchOpts ++= {
-    if (scala.util.Properties.isJavaAtLeast("17")) {
-      Seq("api", "code", "file", "parser", "tree", "util").map { x =>
-        s"--add-exports=jdk.compiler/com.sun.tools.javac.${x}=ALL-UNNAMED"
-      }
-    } else {
-      Nil
-    }
   },
   scriptedBufferLog := false,
   scalafmtOnCompile := !insideCI.value)
@@ -51,6 +42,15 @@ lazy val plugin = project
   .settings(commonSettings *)
   .settings(
     name := "sbt-java-formatter",
+    scriptedLaunchOpts ++= {
+      if (scala.util.Properties.isJavaAtLeast("17")) {
+        Seq("api", "code", "file", "parser", "tree", "util").map { x =>
+          s"--add-exports=jdk.compiler/com.sun.tools.javac.${x}=ALL-UNNAMED"
+        }
+      } else {
+        Nil
+      }
+    },
     libraryDependencies ++= Seq("com.google.googlejavaformat" % "google-java-format" % "1.24.0"))
 
 lazy val `plugin-add-opens` = project
@@ -58,7 +58,7 @@ lazy val `plugin-add-opens` = project
   .enablePlugins(SbtPlugin)
   .enablePlugins(AutomateHeaderPlugin)
   .settings(commonSettings *)
-  .settings(name := "sbt-java-formatter-add-opens")
+  .settings(name := "sbt-java-formatter-add-opens", sbtTestDirectory := (plugin / sbtTestDirectory).value)
   .dependsOn(plugin)
 
 ThisBuild / organization := "com.github.sbt"

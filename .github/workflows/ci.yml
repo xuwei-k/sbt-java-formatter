@@ -7,6 +7,7 @@ on:
   # - cron: '0 7 * * 6'
 jobs:
   test:
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -39,8 +40,8 @@ jobs:
     - name: Build and test (sbt 1.x)
       if: ${{ matrix.jobtype == 1 }}
       shell: bash
-      run: sbt -v '++ 2.12.x' clean scalafmtSbtCheck scalafmtCheckAll test scripted
+      run: sbt -v '++ 2.12.x' clean scalafmtSbtCheck scalafmtCheckAll test plugin-add-opens/scripted
     - name: Build and test (sbt 2.x)
       if: ${{ matrix.jobtype == 2 }}
       shell: bash
-      run: sbt -v '++ 3.x' clean scalafmtSbtCheck scalafmtCheckAll test scripted
+      run: sbt -v '++ 3.x' clean scalafmtSbtCheck scalafmtCheckAll test plugin-add-opens/scripted
